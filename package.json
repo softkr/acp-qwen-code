@@ -17,12 +17,12 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/yourusername/acp-qwen-code.git"
+    "url": "git+https://github.com/softkr/acp-qwen-code.git"
   },
   "bugs": {
-    "url": "https://github.com/yourusername/acp-qwen-code/issues"
+    "url": "https://github.com/softkr/acp-qwen-code/issues"
   },
-  "homepage": "https://github.com/yourusername/acp-qwen-code#readme",
+  "homepage": "https://github.com/softkr/acp-qwen-code#readme",
   "publishConfig": {
     "access": "public",
     "registry": "https://registry.npmjs.org/"
@@ -38,9 +38,7 @@
     "test": "vitest",
     "test:run": "vitest run",
     "test:coverage": "vitest run --coverage",
-    "validate": "npm run typecheck && npm run lint && npm run test:run",
-    "prepublishOnly": "npm run build",
-    "prepare": "npm run build"
+    "validate": "npm run typecheck && npm run lint && npm run test:run"
   },
   "keywords": [
     "acp",
