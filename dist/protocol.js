@@ -178,7 +178,10 @@ export class Connection {
             params,
         };
         return new Promise((resolve, reject) => {
-            this.#pendingResponses.set(id, { resolve, reject });
+            this.#pendingResponses.set(id, {
+                resolve: resolve,
+                reject
+            });
             this.#sendMessage(message).catch(reject);
         });
     }

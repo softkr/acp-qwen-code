@@ -162,7 +162,7 @@ export class QwenCliWrapper extends EventEmitter {
       const { stdout } = await this.executeCommand(['--version']);
       return stdout.trim().length > 0;
     } catch (error) {
-      this.logger.error('Failed to check CLI setup:', error);
+      this.logger.error('Failed to check CLI setup:', error as Record<string, unknown>);
       return false;
     }
   }

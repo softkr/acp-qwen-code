@@ -11,6 +11,7 @@ import { ContextMonitor } from './context-monitor.js';
 import { RequestError } from './protocol.js';
 import { getGlobalErrorHandler } from './error-handler.js';
 import { getGlobalPerformanceMonitor } from './performance-monitor.js';
+import type { PlanEntry } from './types.js';
 
 export interface AgentSession {
   id: string;
@@ -94,11 +95,15 @@ export class QwenAgent {
   async initialize(params: schema.InitializeRequest): Promise<schema.InitializeResponse> {
     this.logger.info('Initializing agent', params);
 
-    // Check Qwen CLI setup
-    const cli = new QwenCliWrapper();
-    const isSetup = await cli.checkSetup();
-    if (!isSetup) {
-      throw RequestError.authRequired('Qwen CLI not found or not properly set up');
+    // Best-effort check of Qwen CLI, but never fail initialize handshake
+    try {
+      const cli = new QwenCliWrapper();
+      const isSetup = await cli.checkSetup();
+      if (!isSetup) {
+        this.logger.warn('Qwen CLI not found or not authenticated; authentication may be required before starting a session');
+      }
+    } catch (e) {
+      this.logger.warn('Failed to probe Qwen CLI during initialize');
     }
 
     return {
@@ -131,8 +136,15 @@ export class QwenAgent {
       throw RequestError.invalidParams('Only browser authentication is supported');
     }
 
-    // We don't need to do anything here since CLI handles auth
-    return;
+    // Trigger Qwen CLI browser-based login
+    const cli = new QwenCliWrapper();
+    try {
+      await cli.executeCommand(['auth', 'login']);
+      this.logger.info('Qwen CLI authentication completed');
+    } catch (error) {
+      this.logger.error('Qwen CLI authentication failed', { error: String(error) });
+      throw RequestError.authRequired('Authentication failed');
+    }
   }
 
   /**
@@ -225,7 +237,7 @@ export class QwenAgent {
       // Send prompt to CLI
       await session.cliWrapper.sendMessage(promptText);
     } catch (error) {
-      this.logger.error('Error processing prompt:', error);
+      this.logger.error('Error processing prompt:', error as Record<string, unknown>);
       throw error;
     }
   }
@@ -289,7 +301,7 @@ export class QwenAgent {
     const session = this.sessions.get(sessionId);
     if (!session) return;
 
-    const plan = [];
+    const plan: PlanEntry[] = [];
     
     if (complexity.estimatedSteps >= 3) {
       plan.push({

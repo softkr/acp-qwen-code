@@ -79,7 +79,7 @@ async function main(): Promise<void> {
     ) as WritableStream<Uint8Array>;
     const inputStream = Readable.toWeb(
       process.stdin,
-    ) as ReadableStream<Uint8Array>;
+    ) as globalThis.ReadableStream<Uint8Array>;
 
     // We're implementing an Agent, so use AgentSideConnection
     let agent: QwenAgent | null = null;

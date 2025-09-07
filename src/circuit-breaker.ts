@@ -170,7 +170,7 @@ export class CircuitBreaker<TArgs, TResult> {
    * Clean up resources
    */
   destroy(): void {
-    clearInterval(this.monitorInterval);
+    clearInterval(this.monitorInterval as NodeJS.Timeout);
   }
 }
 

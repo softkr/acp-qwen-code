@@ -201,7 +201,7 @@ export declare const embeddedResourceResourceSchema: z.ZodUnion<readonly [z.ZodO
 }, z.core.$strip>]>;
 export declare const newSessionRequestSchema: z.ZodObject<{
     cwd: z.ZodString;
-    mcpServers: z.ZodArray<z.ZodObject<{
+    mcpServers: z.ZodOptional<z.ZodArray<z.ZodObject<{
         args: z.ZodArray<z.ZodString>;
         command: z.ZodString;
         env: z.ZodArray<z.ZodObject<{
@@ -209,11 +209,11 @@ export declare const newSessionRequestSchema: z.ZodObject<{
             value: z.ZodString;
         }, z.core.$strip>>;
         name: z.ZodString;
-    }, z.core.$strip>>;
+    }, z.core.$strip>>>;
 }, z.core.$strip>;
 export declare const loadSessionRequestSchema: z.ZodObject<{
     cwd: z.ZodString;
-    mcpServers: z.ZodArray<z.ZodObject<{
+    mcpServers: z.ZodOptional<z.ZodArray<z.ZodObject<{
         args: z.ZodArray<z.ZodString>;
         command: z.ZodString;
         env: z.ZodArray<z.ZodObject<{
@@ -221,7 +221,7 @@ export declare const loadSessionRequestSchema: z.ZodObject<{
             value: z.ZodString;
         }, z.core.$strip>>;
         name: z.ZodString;
-    }, z.core.$strip>>;
+    }, z.core.$strip>>>;
     sessionId: z.ZodString;
 }, z.core.$strip>;
 export declare const initializeResponseSchema: z.ZodObject<{
@@ -1407,7 +1407,7 @@ export declare const agentRequestSchema: z.ZodUnion<readonly [z.ZodObject<{
     methodId: z.ZodString;
 }, z.core.$strip>, z.ZodObject<{
     cwd: z.ZodString;
-    mcpServers: z.ZodArray<z.ZodObject<{
+    mcpServers: z.ZodOptional<z.ZodArray<z.ZodObject<{
         args: z.ZodArray<z.ZodString>;
         command: z.ZodString;
         env: z.ZodArray<z.ZodObject<{
@@ -1415,10 +1415,10 @@ export declare const agentRequestSchema: z.ZodUnion<readonly [z.ZodObject<{
             value: z.ZodString;
         }, z.core.$strip>>;
         name: z.ZodString;
-    }, z.core.$strip>>;
+    }, z.core.$strip>>>;
 }, z.core.$strip>, z.ZodObject<{
     cwd: z.ZodString;
-    mcpServers: z.ZodArray<z.ZodObject<{
+    mcpServers: z.ZodOptional<z.ZodArray<z.ZodObject<{
         args: z.ZodArray<z.ZodString>;
         command: z.ZodString;
         env: z.ZodArray<z.ZodObject<{
@@ -1426,7 +1426,7 @@ export declare const agentRequestSchema: z.ZodUnion<readonly [z.ZodObject<{
             value: z.ZodString;
         }, z.core.$strip>>;
         name: z.ZodString;
-    }, z.core.$strip>>;
+    }, z.core.$strip>>>;
     sessionId: z.ZodString;
 }, z.core.$strip>, z.ZodObject<{
     prompt: z.ZodArray<z.ZodUnion<readonly [z.ZodObject<{

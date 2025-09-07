@@ -249,12 +249,12 @@ export const embeddedResourceResourceSchema = z.union([
 
 export const newSessionRequestSchema = z.object({
   cwd: z.string(),
-  mcpServers: z.array(mcpServerSchema),
+  mcpServers: z.array(mcpServerSchema).optional(),
 });
 
 export const loadSessionRequestSchema = z.object({
   cwd: z.string(),
-  mcpServers: z.array(mcpServerSchema),
+  mcpServers: z.array(mcpServerSchema).optional(),
   sessionId: z.string(),
 });
 

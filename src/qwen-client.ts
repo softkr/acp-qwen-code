@@ -127,7 +127,7 @@ export class QwenClient {
             for (const choice of response.choices) {
               if (choice.delta?.content || choice.delta?.function_call) {
                 yield {
-                  role: choice.delta.role || 'assistant',
+                  role: (choice.delta.role || 'assistant') as 'user' | 'assistant' | 'system',
                   content: choice.delta.content || '',
                   ...(choice.delta.function_call && {
                     toolCalls: [{

@@ -111,8 +111,8 @@ export type ErrorResponse = {
 };
 
 /** Response for pending requests */
-type PendingResponse = {
-  resolve: (response: unknown) => void;
+type PendingResponse<T = unknown> = {
+  resolve: (response: T) => void;
   reject: (error: ErrorResponse) => void;
 };
 
@@ -265,7 +265,10 @@ export class Connection {
     };
 
     return new Promise<T>((resolve, reject) => {
-      this.#pendingResponses.set(id, { resolve, reject });
+      this.#pendingResponses.set(id, { 
+        resolve: resolve as (response: unknown) => void, 
+        reject 
+      });
       this.#sendMessage(message).catch(reject);
     });
   }

@@ -51,11 +51,16 @@ export class QwenAgent {
      */
     async initialize(params) {
         this.logger.info('Initializing agent', params);
-        // Check Qwen CLI setup
-        const cli = new QwenCliWrapper();
-        const isSetup = await cli.checkSetup();
-        if (!isSetup) {
-            throw RequestError.authRequired('Qwen CLI not found or not properly set up');
+        // Best-effort check of Qwen CLI, but never fail initialize handshake
+        try {
+            const cli = new QwenCliWrapper();
+            const isSetup = await cli.checkSetup();
+            if (!isSetup) {
+                this.logger.warn('Qwen CLI not found or not authenticated; authentication may be required before starting a session');
+            }
+        }
+        catch (e) {
+            this.logger.warn('Failed to probe Qwen CLI during initialize');
         }
         return {
             protocolVersion: schema.PROTOCOL_VERSION,
@@ -84,8 +89,16 @@ export class QwenAgent {
         if (params.methodId !== 'browser') {
             throw RequestError.invalidParams('Only browser authentication is supported');
         }
-        // We don't need to do anything here since CLI handles auth
-        return;
+        // Trigger Qwen CLI browser-based login
+        const cli = new QwenCliWrapper();
+        try {
+            await cli.executeCommand(['auth', 'login']);
+            this.logger.info('Qwen CLI authentication completed');
+        }
+        catch (error) {
+            this.logger.error('Qwen CLI authentication failed', { error: String(error) });
+            throw RequestError.authRequired('Authentication failed');
+        }
     }
     /**
      * Create new session
