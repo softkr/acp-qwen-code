@@ -1,0 +1,80 @@
+{
+  "name": "@softkr/acp-qwen-code",
+  "version": "0.1.0",
+  "description": "ACP (Agent Client Protocol) bridge for Qwen models",
+  "main": "dist/cli.js",
+  "type": "module",
+  "bin": {
+    "acp-qwen-code": "dist/cli.js"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/yourusername/acp-qwen-code.git"
+  },
+  "bugs": {
+    "url": "https://github.com/yourusername/acp-qwen-code/issues"
+  },
+  "homepage": "https://github.com/yourusername/acp-qwen-code#readme",
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  },
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/cli.js",
+    "dev": "tsx src/cli.ts",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint src",
+    "format": "prettier --write .",
+    "diagnose": "node dist/cli.js --diagnose",
+    "test": "vitest",
+    "test:run": "vitest run",
+    "test:coverage": "vitest run --coverage",
+    "validate": "npm run typecheck && npm run lint && npm run test:run",
+    "prepublishOnly": "npm run build",
+    "prepare": "npm run build"
+  },
+  "keywords": [
+    "acp",
+    "qwen",
+    "qwen-code",
+    "zed",
+    "ai-agent",
+    "llm"
+  ],
+  "author": "Your Name <your.email@example.com>",
+  "license": "MIT",
+  "dependencies": {
+    "@zed-industries/agent-client-protocol": "0.1.2",
+    "axios": "^1.7.9",
+    "dotenv": "^16.4.5",
+    "commander": "^12.1.0",
+    "zod": "^4.1.5"
+  },
+  "devDependencies": {
+    "@eslint/js": "9.34.0",
+    "@types/node": "^24.3.0",
+    "@typescript-eslint/eslint-plugin": "^8.20.0",
+    "@typescript-eslint/parser": "^8.20.0",
+    "@vitest/ui": "^3.2.4",
+    "eslint": "^9.17.0",
+    "globals": "16.3.0",
+    "prettier": "^3.6.2",
+    "tsx": "^4.0.0",
+    "typescript": "^5.0.0",
+    "typescript-eslint": "8.41.0",
+    "vitest": "^3.2.4"
+  },
+  "directories": {
+    "test": "test"
+  },
+  "types": "./dist/cli.d.ts"
+}
