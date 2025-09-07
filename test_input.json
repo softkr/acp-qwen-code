@@ -1,0 +1,1 @@
+{"jsonrpc":"2.0","method":"initialize","params":{"clientInfo":{"name":"zed","version":"1.0"},"clientCapabilities":{"fs":{"readTextFile":true,"writeTextFile":true}},"protocolVersion":20241105},"id":1}

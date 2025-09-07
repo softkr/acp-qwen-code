@@ -115,9 +115,8 @@ export class Logger {
                 data: entry.data || {},
             });
         }
-        // Log to appropriate console method
-        const method = entry.level === 'error' ? 'error' : 'log';
-        console[method](line);
+        // Log to stderr to avoid interfering with ACP stdout communication
+        process.stderr.write(line + '\n');
     }
     /**
      * Write entry to file
