@@ -113,12 +113,18 @@ export class QwenAgent {
         });
         // Start chat session
         await cli.startChat();
+        this.logger.info('Chat session started for session', { sessionId });
         // Handle chat output
         cli.on('message', (content) => {
+            this.logger.debug('Received message from CLI', { sessionId, content: content.substring(0, 100) + '...' });
             this.handleChatOutput(sessionId, content);
         });
         cli.on('error', (error) => {
+            this.logger.error('CLI error', { sessionId, error: error.message });
             this.handleChatError(sessionId, error);
+        });
+        cli.on('end', (code) => {
+            this.logger.info('CLI process ended', { sessionId, code });
         });
         // Create session
         const session = {
@@ -172,11 +178,16 @@ export class QwenAgent {
         }
         try {
             // Send prompt to CLI
+            this.logger.info('Sending message to CLI', { sessionId: params.sessionId, message: promptText });
             await session.cliWrapper.sendMessage(promptText);
+            this.logger.info('Message sent to CLI successfully', { sessionId: params.sessionId });
+            // Return successful completion
+            return { stopReason: 'end_turn' };
         }
         catch (error) {
             this.logger.error('Error processing prompt:', error);
-            throw error;
+            // Return error completion
+            return { stopReason: 'cancelled' };
         }
     }
     /**

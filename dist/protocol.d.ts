@@ -15,7 +15,7 @@ export interface Agent {
     authenticate(params: schema.AuthenticateRequest): Promise<void>;
     newSession(params: schema.NewSessionRequest): Promise<schema.NewSessionResponse>;
     loadSession?(params: schema.LoadSessionRequest): Promise<void>;
-    prompt(params: schema.PromptRequest): Promise<void>;
+    prompt(params: schema.PromptRequest): Promise<schema.PromptResponse>;
     cancel(params: schema.CancelNotification): Promise<void>;
 }
 /** Base request error class */

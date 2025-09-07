@@ -1,0 +1,9 @@
+{
+  "agents": [
+    {
+      "name": "qwen-local",
+      "command": "node",
+      "args": ["/Volumes/work/zed-qwen_new/acp-qwen-code/dist/cli.js"]
+    }
+  ]
+}

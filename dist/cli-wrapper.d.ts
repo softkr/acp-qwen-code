@@ -12,6 +12,11 @@ export declare class QwenCliWrapper extends EventEmitter {
     private config;
     private logger;
     private currentProcess;
+    private responseBuffer;
+    /**
+     * Clean terminal output by removing ANSI codes and filtering unwanted content
+     */
+    private cleanOutput;
     constructor(config?: QwenCliConfig);
     /**
      * Execute Qwen CLI command

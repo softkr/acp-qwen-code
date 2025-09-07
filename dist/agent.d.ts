@@ -63,7 +63,7 @@ export declare class QwenAgent {
     /**
      * Process prompt
      */
-    prompt(params: schema.PromptRequest): Promise<void>;
+    prompt(params: schema.PromptRequest): Promise<schema.PromptResponse>;
     /**
      * Analyze prompt complexity
      */

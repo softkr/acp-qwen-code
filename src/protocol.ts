@@ -25,7 +25,7 @@ export interface Agent {
   authenticate(params: schema.AuthenticateRequest): Promise<void>;
   newSession(params: schema.NewSessionRequest): Promise<schema.NewSessionResponse>;
   loadSession?(params: schema.LoadSessionRequest): Promise<void>;
-  prompt(params: schema.PromptRequest): Promise<void>;
+  prompt ( params: schema.PromptRequest ): Promise<schema.PromptResponse>;
   cancel(params: schema.CancelNotification): Promise<void>;
 }
 
@@ -171,9 +171,22 @@ export class Connection {
   /** Process a single message */
   async #processMessage(message: AnyMessage): Promise<void> {
     try {
+      if ( process.env.ACP_DEBUG === 'true' )
+      {
+        console.error( `[Protocol] Processing message: ${ JSON.stringify( message ) }` );
+      }
+
       if ('method' in message && 'id' in message) {
         // Handle request
+        if ( process.env.ACP_DEBUG === 'true' )
+        {
+          console.error( `[Protocol] Handling request: ${ message.method }` );
+        }
         const response = await this.#tryCallHandler(message.method, message.params);
+        if ( process.env.ACP_DEBUG === 'true' )
+        {
+          console.error( `[Protocol] Request response: ${ JSON.stringify( response ) }` );
+        }
         await this.#sendMessage({
           jsonrpc: '2.0',
           id: message.id,
@@ -181,6 +194,10 @@ export class Connection {
         });
       } else if ('id' in message) {
         // Handle response
+        if ( process.env.ACP_DEBUG === 'true' )
+        {
+          console.error( `[Protocol] Handling response for ID: ${ message.id }` );
+        }
         const pendingResponse = this.#pendingResponses.get(message.id);
         if (pendingResponse) {
           this.#pendingResponses.delete(message.id);
@@ -192,6 +209,10 @@ export class Connection {
         }
       } else if ('method' in message) {
         // Handle notification
+        if ( process.env.ACP_DEBUG === 'true' )
+        {
+          console.error( `[Protocol] Handling notification: ${ message.method }` );
+        }
         await this.#tryCallHandler(message.method, message.params);
       }
     } catch (error) {
@@ -239,7 +260,7 @@ export class Connection {
 
   /** Send a message to the peer */
   async #sendMessage(message: AnyMessage): Promise<void> {
-    const line = JSON.stringify(message) + '\\n';
+    const line = JSON.stringify( message ) + '\n';
     const chunk = this.#textEncoder.encode(line);
 
     this.#writeQueue = this.#writeQueue.then(async () => {

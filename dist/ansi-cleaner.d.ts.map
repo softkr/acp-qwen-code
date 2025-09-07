@@ -1,0 +1,1 @@
+{"version":3,"file":"ansi-cleaner.d.ts","sourceRoot":"","sources":["../src/ansi-cleaner.ts"],"names":[],"mappings":"AAAA;;GAEG;AAEH,qBAAa,WAAW;IACtB;;OAEG;IACH,MAAM,CAAC,WAAW,CAAC,KAAK,EAAE,MAAM,GAAG,MAAM;IA8DzC;;OAEG;IACH,MAAM,CAAC,cAAc,CAAC,KAAK,EAAE,MAAM,GAAG,MAAM;CA0B7C"}

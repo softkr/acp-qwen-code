@@ -3,6 +3,8 @@
  */
 import { spawn } from 'child_process';
 import { EventEmitter } from 'events';
+import * as pty from 'node-pty';
+import { AnsiCleaner } from './ansi-cleaner.js';
 import { createLogger } from './logger.js';
 const DEFAULT_CONFIG = {
     executable: 'qwen',
@@ -14,6 +16,13 @@ export class QwenCliWrapper extends EventEmitter {
     config;
     logger = createLogger('QwenCliWrapper');
     currentProcess = null;
+    responseBuffer = '';
+    /**
+     * Clean terminal output by removing ANSI codes and filtering unwanted content
+     */
+    cleanOutput(data) {
+        return AnsiCleaner.extractContent(data);
+    }
     constructor(config = {}) {
         super();
         this.config = { ...DEFAULT_CONFIG, ...config };
@@ -76,27 +85,48 @@ export class QwenCliWrapper extends EventEmitter {
         if (this.currentProcess) {
             throw new Error('Chat session already in progress');
         }
-        const args = ['chat'];
+        const args = [];
         if (options.model) {
             args.push('--model', options.model);
         }
-        const child = spawn(this.config.executable, [...args, ...this.config.args], {
-            env: { ...process.env, ...this.config.env },
+        const ptyProcess = pty.spawn(this.config.executable, [...args, ...this.config.args], {
+            name: 'xterm-color',
+            cols: 80,
+            rows: 30,
+            cwd: process.cwd(),
+            env: {
+                ...process.env,
+                ...this.config.env,
+                PYTHONUNBUFFERED: '1',
+                NODE_NO_READLINE: '1'
+            }
         });
-        this.currentProcess = child;
+        this.currentProcess = ptyProcess;
+        this.logger.debug('CLI pty process started', { pid: ptyProcess.pid });
         // Handle process events
-        child.stdout.on('data', (data) => {
-            this.emit('message', data.toString());
+        ptyProcess.onData((data) => {
+            this.logger.debug('CLI pty raw data received', {
+                raw: data.substring(0, 200) + '...',
+                length: data.length
+            });
+            // Add to buffer for processing
+            this.responseBuffer += data;
+            // Auto-respond to common prompts before cleaning
+            if (data.includes('Do you want to connect') || data.includes('VS Code')) {
+                this.logger.debug('Auto-responding to VS Code connection prompt');
+                ptyProcess.write('2\n'); // Select "No (esc)" option
+                return; // Skip processing this prompt data
+            }
+            // Clean the output
+            const cleaned = this.cleanOutput(data);
+            if (cleaned.length > 0) {
+                this.logger.debug('CLI pty cleaned data', { cleaned });
+                this.emit('message', cleaned);
+            }
         });
-        child.stderr.on('data', (data) => {
-            this.emit('error', new Error(data.toString()));
-        });
-        child.on('close', (code) => {
-            this.emit('end', code);
-            this.currentProcess = null;
-        });
-        child.on('error', (error) => {
-            this.emit('error', error);
+        ptyProcess.onExit(({ exitCode, signal }) => {
+            this.logger.info('CLI pty process ended', { exitCode, signal });
+            this.emit('end', exitCode);
             this.currentProcess = null;
         });
     }
@@ -107,14 +137,16 @@ export class QwenCliWrapper extends EventEmitter {
         if (!this.currentProcess) {
             throw new Error('No active chat session');
         }
-        this.currentProcess.stdin?.write(message + '\n');
+        this.logger.debug('Sending message to CLI pty process', { message: message.substring(0, 100) + '...' });
+        this.currentProcess.write(message + '\n');
+        this.logger.debug('Message written to CLI pty');
     }
     /**
      * End chat session
      */
     async endChat() {
         if (this.currentProcess) {
-            this.currentProcess.stdin?.end();
+            this.currentProcess.kill();
             this.currentProcess = null;
         }
     }

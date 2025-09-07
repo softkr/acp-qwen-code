@@ -87,9 +87,18 @@ export class Connection {
     /** Process a single message */
     async #processMessage(message) {
         try {
+            if (process.env.ACP_DEBUG === 'true') {
+                console.error(`[Protocol] Processing message: ${JSON.stringify(message)}`);
+            }
             if ('method' in message && 'id' in message) {
                 // Handle request
+                if (process.env.ACP_DEBUG === 'true') {
+                    console.error(`[Protocol] Handling request: ${message.method}`);
+                }
                 const response = await this.#tryCallHandler(message.method, message.params);
+                if (process.env.ACP_DEBUG === 'true') {
+                    console.error(`[Protocol] Request response: ${JSON.stringify(response)}`);
+                }
                 await this.#sendMessage({
                     jsonrpc: '2.0',
                     id: message.id,
@@ -98,6 +107,9 @@ export class Connection {
             }
             else if ('id' in message) {
                 // Handle response
+                if (process.env.ACP_DEBUG === 'true') {
+                    console.error(`[Protocol] Handling response for ID: ${message.id}`);
+                }
                 const pendingResponse = this.#pendingResponses.get(message.id);
                 if (pendingResponse) {
                     this.#pendingResponses.delete(message.id);
@@ -111,6 +123,9 @@ export class Connection {
             }
             else if ('method' in message) {
                 // Handle notification
+                if (process.env.ACP_DEBUG === 'true') {
+                    console.error(`[Protocol] Handling notification: ${message.method}`);
+                }
                 await this.#tryCallHandler(message.method, message.params);
             }
         }
@@ -155,7 +170,7 @@ export class Connection {
     }
     /** Send a message to the peer */
     async #sendMessage(message) {
-        const line = JSON.stringify(message) + '\\n';
+        const line = JSON.stringify(message) + '\n';
         const chunk = this.#textEncoder.encode(line);
         this.#writeQueue = this.#writeQueue.then(async () => {
             const writer = this.#peerInput.getWriter();
