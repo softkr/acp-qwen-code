@@ -8,6 +8,9 @@ import { program } from 'commander';
 import dotenv from 'dotenv';
 import * as os from 'os';
 import * as path from 'path';
+import { readFileSync } from 'node:fs';
+import { join, dirname } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { Readable, Writable } from 'node:stream';
 import { ReadableStream, WritableStream } from 'node:stream/web';
 import { createLogger } from './logger.js';
@@ -18,6 +21,18 @@ import { QwenAgent } from './agent.js';
 // Load environment variables
 dotenv.config();
 
+// Get package version
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+let packageVersion = '0.1.0'; // fallback
+try {
+  const packagePath = join(__dirname, '..', 'package.json');
+  const packageJson = JSON.parse(readFileSync(packagePath, 'utf-8'));
+  packageVersion = packageJson.version;
+} catch (error) {
+  // Use fallback version if package.json not found
+}
+
 /**
  * Main CLI entry point
  */
@@ -26,7 +41,7 @@ async function main(): Promise<void> {
   program
     .name('acp-qwen-code')
     .description('Qwen Code ACP bridge for Zed')
-    .version(process.env.npm_package_version || '0.1.0')
+    .version(packageVersion)
     .option('--diagnose', 'Run diagnostics and report system status')
     .option('--setup', 'Run initial setup')
     .option('--test', 'Test ACP connection')

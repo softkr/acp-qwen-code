@@ -115,10 +115,12 @@ export class DiagnosticSystem {
                 };
             }
             const version = checkResult.output.trim();
-            // Check authentication status
-            const authCheckResult = await this.runCommand('qwen auth status');
+            // Check authentication status by testing actual functionality
+            const authCheckResult = await this.runCommand('echo "test" | qwen -p "respond with OK" --yolo');
             const authenticated = authCheckResult.success &&
-                authCheckResult.output.toLowerCase().includes('authenticated');
+                (authCheckResult.output.toLowerCase().includes('ok') ||
+                    authCheckResult.output.toLowerCase().includes('yes') ||
+                    authCheckResult.output.trim().length > 0);
             // Get default model if available
             let defaultModel;
             try {
