@@ -140,18 +140,31 @@ export class Connection {
   async #receive(output: ReadableStream<Uint8Array>): Promise<void> {
     let content = '';
     const decoder = new TextDecoder();
-    for await (const chunk of output) {
-      content += decoder.decode(chunk, { stream: true });
-      const lines = content.split('\\n');
-      content = lines.pop() || '';
-
-      for (const line of lines) {
-        const trimmedLine = line.trim();
-        if (trimmedLine) {
-          const message = JSON.parse(trimmedLine);
-          await this.#processMessage(message);
+    const reader = output.getReader();
+    try {
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        if (value) {
+          content += decoder.decode(value, { stream: true });
+          const lines = content.split('\n');
+          content = lines.pop() || '';
+          for (const line of lines) {
+            const trimmedLine = line.trim();
+            if (!trimmedLine) continue;
+            try {
+              const message = JSON.parse(trimmedLine);
+              await this.#processMessage(message);
+            } catch (err) {
+              console.error('[Protocol] Failed to parse message line:', trimmedLine, err);
+            }
+          }
         }
       }
+    } catch (err) {
+      console.error('[Protocol] Receive loop error:', err);
+    } finally {
+      reader.releaseLock();
     }
   }
 

@@ -1,6 +1,3 @@
-/**
- * Monitor and manage system resources
- */
 /** Resource statistics type */
 interface ResourceStats {
     memory: NodeJS.MemoryUsage;

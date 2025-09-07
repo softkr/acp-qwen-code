@@ -46,7 +46,7 @@ export class QwenCliWrapper extends EventEmitter {
         : this.config.executable;
 
       // Start process
-      const process = spawn(executable, [...command, ...this.config.args], {
+      const child = spawn(executable, [...command, ...this.config.args], {
         env: { ...process.env, ...this.config.env },
       });
 
@@ -54,16 +54,16 @@ export class QwenCliWrapper extends EventEmitter {
       let stderr = '';
 
       // Handle output
-      process.stdout.on('data', (data) => {
+      child.stdout.on('data', (data: Buffer) => {
         stdout += data.toString();
       });
 
-      process.stderr.on('data', (data) => {
+      child.stderr.on('data', (data: Buffer) => {
         stderr += data.toString();
       });
 
       // Handle completion
-      process.on('close', (code) => {
+      child.on('close', (code: number) => {
         if (code === 0) {
           resolve({ stdout, stderr });
         } else {
@@ -71,25 +71,25 @@ export class QwenCliWrapper extends EventEmitter {
         }
       });
 
-      process.on('error', (error) => {
+      child.on('error', (error: Error) => {
         reject(error);
       });
 
       // Handle timeout
       const timer = setTimeout(() => {
-        process.kill();
+        child.kill();
         reject(new Error(`Command timed out after ${timeout}ms`));
       }, timeout);
 
       // Clean up on completion
-      process.on('close', () => {
+      child.on('close', () => {
         clearTimeout(timer);
       });
 
       // Write to stdin if provided
       if (options.stdin) {
-        process.stdin.write(options.stdin);
-        process.stdin.end();
+        child.stdin.write(options.stdin);
+        child.stdin.end();
       }
     });
   }
@@ -107,27 +107,27 @@ export class QwenCliWrapper extends EventEmitter {
       args.push('--model', options.model);
     }
 
-    const process = spawn(this.config.executable, [...args, ...this.config.args], {
+    const child = spawn(this.config.executable, [...args, ...this.config.args], {
       env: { ...process.env, ...this.config.env },
     });
 
-    this.currentProcess = process;
+    this.currentProcess = child;
 
     // Handle process events
-    process.stdout.on('data', (data) => {
+    child.stdout.on('data', (data: Buffer) => {
       this.emit('message', data.toString());
     });
 
-    process.stderr.on('data', (data) => {
+    child.stderr.on('data', (data: Buffer) => {
       this.emit('error', new Error(data.toString()));
     });
 
-    process.on('close', (code) => {
+    child.on('close', (code: number) => {
       this.emit('end', code);
       this.currentProcess = null;
     });
 
-    process.on('error', (error) => {
+    child.on('error', (error: Error) => {
       this.emit('error', error);
       this.currentProcess = null;
     });
@@ -141,7 +141,7 @@ export class QwenCliWrapper extends EventEmitter {
       throw new Error('No active chat session');
     }
 
-    this.currentProcess.stdin.write(message + '\\n');
+    this.currentProcess.stdin?.write(message + '\n');
   }
 
   /**
@@ -149,7 +149,7 @@ export class QwenCliWrapper extends EventEmitter {
    */
   async endChat(): Promise<void> {
     if (this.currentProcess) {
-      this.currentProcess.stdin.end();
+      this.currentProcess.stdin?.end();
       this.currentProcess = null;
     }
   }

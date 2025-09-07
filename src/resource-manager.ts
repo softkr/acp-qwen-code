@@ -1,6 +1,7 @@
 /**
  * Monitor and manage system resources
  */
+import * as os from 'os';
 
 /** Resource statistics type */
 interface ResourceStats {
@@ -44,11 +45,11 @@ export class ResourceManager {
    */
   getCurrentStats(): ResourceStats {
     const memory = process.memoryUsage();
-    const loadAvg = process.loadavg();
+    const loadAvg = os.loadavg();
     const uptime = process.uptime();
 
     // Calculate CPU usage (rough estimate)
-    const cpuUsage = loadAvg[0] / require('os').cpus().length * 100;
+    const cpuUsage = (loadAvg[0] / os.cpus().length) * 100;
 
     const stats = {
       memory,
@@ -94,14 +95,14 @@ export class ResourceManager {
     }
 
     // Check RSS usage
-    const totalMemory = require('os').totalmem();
+    const totalMemory = os.totalmem();
     const rssPercentage = (stats.memory.rss / totalMemory) * 100;
     if (rssPercentage >= this.warningThresholds.rssPercentage) {
       this.emitWarning('rss', rssPercentage);
     }
 
     // Check load average
-    const cpuCount = require('os').cpus().length;
+    const cpuCount = os.cpus().length;
     const loadFactor = stats.cpu.loadAvg[0] / cpuCount;
     if (loadFactor >= this.warningThresholds.loadAvgFactor) {
       this.emitWarning('load_average', loadFactor);
@@ -138,8 +139,8 @@ export class ResourceManager {
     cpu: number;
   } {
     const stats = this.getCurrentStats();
-    const totalMemory = require('os').totalmem();
-    const cpuCount = require('os').cpus().length;
+    const totalMemory = os.totalmem();
+    const cpuCount = os.cpus().length;
 
     return {
       heapUsed: (stats.memory.heapUsed / stats.memory.heapTotal) * 100,

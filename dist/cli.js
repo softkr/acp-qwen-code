@@ -141,16 +141,16 @@ async function runSetup() {
         console.error('SUCCESS: System Check:');
         console.error(`   Platform: ${report.platform.platform} (${report.platform.arch})`);
         console.error(`   Node.js: ${report.platform.nodeVersion}`);
-        console.error(`   API Key: ${report.api.hasApiKey ? '✅ Found' : '❌ Missing'}`);
-        console.error(`   Authentication: ${report.api.authenticated ? '✅ Ready' : '❌ Required'}`);
+        console.error(`   Qwen CLI: ${report.qwen.available ? '✅ Found' : '❌ Missing'}`);
+        console.error(`   Authentication: ${report.qwen.authenticated ? '✅ Ready' : '❌ Required'}`);
         console.error(`   Score: ${report.score}/100\n`);
-        if (!report.api.hasApiKey) {
-            console.error('API: API Key required:');
-            console.error('   export QWEN_API_KEY=your-api-key\\n');
+        if (!report.qwen.available) {
+            console.error('CLI: Qwen CLI not found:');
+            console.error('   Install qwen CLI and ensure it is in PATH\\n');
         }
-        if (!report.api.authenticated) {
+        if (report.qwen.available && !report.qwen.authenticated) {
             console.error('AUTH: Authentication required:');
-            console.error('   Check your API key and network connectivity\\n');
+            console.error('   Run `qwen auth login` and check network connectivity\\n');
         }
         console.error('CONFIG: Recommended Zed configuration:');
         console.error('{\\n  "agent_servers": {\\n    "qwen-code": {\\n      "command": "npx",');
@@ -175,7 +175,7 @@ async function runTest() {
         console.error(`   Memory: ${Math.round(metrics.memory.rss / 1024 / 1024)}MB used`);
         console.error(`   Uptime: ${Math.round(metrics.uptime)}s`);
         console.error(`   Compatible: ${report.compatible ? 'Yes' : 'No'}`);
-        if (report.api.hasApiKey && report.api.authenticated) {
+        if (report.qwen.available && report.qwen.authenticated) {
             console.error('SUCCESS: Connection test passed');
             process.exit(0);
         }
